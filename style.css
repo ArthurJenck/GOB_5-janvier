@@ -6,3 +6,10 @@ body {
     height: 100%;
     overflow: hidden;
 }
+
+#countdown {
+    position: fixed;
+    bottom: 0.5rem;
+    right: 2rem;
+    font-size: 2rem;
+}

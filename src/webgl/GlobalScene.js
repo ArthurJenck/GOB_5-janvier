@@ -2,6 +2,7 @@ import CameraManager from './CameraManager';
 import { BoxGeometry, Mesh, MeshBasicMaterial, Scene } from 'three';
 import LightsManager from './LightsManager';
 import Background from './Background';
+import DaysManager from './DaysManager';
 
 export default class GlobalScene extends Scene {
     constructor(options = {}) {
@@ -15,6 +16,7 @@ export default class GlobalScene extends Scene {
         this.box = this.createBox();
 
         this.backgroundManager = this.createBackground();
+        this.daysManager = this.createDaysManager();
     }
 
     get camera() {
@@ -51,6 +53,11 @@ export default class GlobalScene extends Scene {
 
     createBackground() {
         return new Background({ scene: this, debugger: this.debugger });
+    }
+
+    createDaysManager() {
+        const daysManager = new DaysManager();
+        return daysManager;
     }
 
     resize(width, height) {
