@@ -7,16 +7,15 @@ export default class WebGLApplication {
     constructor() {
         this.renderWidth = window.innerWidth;
         this.renderHeight = window.innerHeight;
+        this.renderSize = { width: this.renderWidth, height: this.renderHeight };
         this.experienceStarted = false;
 
         this.renderer = this.createRenderer();
         this.debugger = this.createDebugger();
         this.scene = this.createScene();
-
+        this.camera = this.scene.camera;
         this.experienceManager = this.createExperienceManager();
         this.startExperience();
-
-        this.camera = this.scene.camera;
 
         this.resize();
 
@@ -48,7 +47,8 @@ export default class WebGLApplication {
         const experienceManager = new ExperienceManager({
             scene: this.scene,
             debugger: this.debugger,
-            renderSize: { width: this.renderWidth, height: this.renderWidth },
+            renderSize: this.renderSize,
+            camera: this.camera,
         });
 
         return experienceManager;
@@ -60,9 +60,12 @@ export default class WebGLApplication {
     }
 
     resize() {
+        this.renderSize.width = this.renderWidth;
+        this.renderSize.height = this.renderHeight;
         this.renderer.setSize(this.renderWidth, this.renderHeight);
 
         this.scene.resize(this.renderWidth, this.renderHeight);
+        this.experienceManager.resize();
     }
 
     update() {

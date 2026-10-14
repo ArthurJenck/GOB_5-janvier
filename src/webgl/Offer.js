@@ -1,14 +1,16 @@
+import gsap from 'gsap';
 import { BoxGeometry, Mesh, MeshBasicMaterial } from 'three';
 
 export default class Offer {
     constructor(options = {}) {
         this.position = options.position;
+        this.normalizedPosition = options.normalizedPosition;
+        this.spawnedAt = options.spawnedAt;
+        this.ttl = options.ttl;
 
         this.geometry = this.createGeometry();
         this.material = this.createMaterial();
         this.mesh = this.createMesh();
-
-        return this.mesh;
     }
 
     createGeometry() {
@@ -17,7 +19,7 @@ export default class Offer {
     }
 
     createMaterial() {
-        const material = new MeshBasicMaterial({ color: 0xff0000 });
+        const material = new MeshBasicMaterial({ color: 0x02b500 });
         return material;
     }
 
@@ -29,12 +31,17 @@ export default class Offer {
         return mesh;
     }
 
+    apply(scene) {
+        gsap.to(this.mesh.rotation, { y: Math.PI, duration: 0.2 }).then(() => this.destroy(scene));
+    }
+
     positionMesh(mesh) {
         mesh.position.x = this.position.x;
         mesh.position.y = this.position.y;
     }
 
-    destroy() {
+    destroy(scene) {
+        scene.remove(this.mesh);
         this.geometry.dispose();
         this.material.dispose();
     }

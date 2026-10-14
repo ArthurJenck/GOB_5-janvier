@@ -1,8 +1,12 @@
+import { Raycaster, Vector2 } from 'three';
 import Offer from './Offer';
 
 const params = {
-    // spawnThreshold: 0.005,
-    spawnThreshold: 0.1,
+    // spawnCooldown: 60,
+    spawnCooldown: 60,
+    // spawnRandomThreshold: 0.005,
+    spawnRandomThreshold: 0.8,
+    offerTtl: 200,
 };
 
 export default class OffersManager {
@@ -10,43 +14,130 @@ export default class OffersManager {
         this.scene = options.scene;
         this.debugger = options.debugger;
         this.renderSize = options.renderSize;
+        this.camera = options.camera;
 
         this.offers = [];
-
         this.lastSpawnedAt = 0;
 
         this.debugFolder = this.createDebugFolder();
+
+        this.raycaster = new Raycaster();
+        this.cursor = new Vector2();
+
+        this.setupEventListeners();
     }
 
-    decideIfSpawnOffer() {
-        if (Math.random() < params.spawnThreshold) {
-            this.spawnOffer();
+    tick(ellapsed) {
+        this.decideIfSpawnOffer(ellapsed);
+
+        this.offers.forEach((offer) => {
+            if (ellapsed - offer.spawnedAt >= offer.ttl) offer.destroy(this.scene);
+        });
+    }
+
+    decideIfSpawnOffer(ellapsed) {
+        if (ellapsed - this.lastSpawnedAt > params.spawnCooldown && Math.random() < params.spawnRandomThreshold) {
+            this.spawnOffer(ellapsed);
         }
     }
 
-    spawnOffer() {
-        const position = {
-            x: (Math.random() * 2 - 1) * 3,
-            y: (Math.random() * 2 - 1) * 3,
+    spawnOffer(spawnedAt) {
+        const normalizedPosition = {
+            x: Math.random() * 2 - 1,
+            y: Math.random() * 2 - 1,
         };
 
-        const offer = new Offer({ position });
+        const offer = new Offer({
+            position: this.getOfferPosition(normalizedPosition),
+            normalizedPosition,
+            ttl: params.offerTtl,
+            spawnedAt: spawnedAt,
+        });
 
         this.offers.push(offer);
-        this.scene.add(offer);
+        this.scene.add(offer.mesh);
+        this.lastSpawnedAt = spawnedAt;
 
         return offer;
     }
 
-    removeAllOffers() {
+    getOfferPosition(normalizedPosition) {
+        const halfSize = 0.25;
+        const distance = Math.max(0, this.camera.position.z - halfSize);
+        const halfHeight = Math.tan((this.camera.fov * Math.PI) / 360) * distance;
+        const halfWidth = halfHeight * this.camera.aspect;
+
+        return {
+            x: this.camera.position.x + normalizedPosition.x * Math.max(0, halfWidth - halfSize),
+            y: this.camera.position.y + normalizedPosition.y * Math.max(0, halfHeight - halfSize),
+        };
+    }
+
+    resize() {
         this.offers.forEach((offer) => {
-            offer.geometry.dispose();
-            offer.material.dispose();
-            this.scene.remove(offer);
+            offer.position = this.getOfferPosition(offer.normalizedPosition);
+            offer.positionMesh(offer.mesh);
         });
-        this.offers.length = 0;
+    }
+
+    raycast() {
+        this.raycaster.setFromCamera(this.cursor, this.camera);
+        const intersects = this.raycaster.intersectObjects(
+            this.offers.map((offer) => offer.mesh),
+            false,
+        );
+        if (intersects.length === 0) return;
+
+        const firstTarget = intersects[0].object;
+        const offer = this.offers.find((offer) => offer.mesh === firstTarget);
+        if (offer) offer.apply(this.scene);
+    }
+
+    removeOffer(offer) {
+        this.scene.remove(offer.mesh);
+        offer.geometry.dispose();
+        offer.material.dispose();
+
+        const index = this.offers.indexOf(offer);
+        if (index !== -1) this.offers.splice(index, 1);
+    }
+
+    removeAllOffers() {
+        [...this.offers].forEach((offer) => {
+            this.removeOffer(offer);
+        });
 
         return this.offers;
+    }
+
+    /**
+     * Events
+     */
+    setupEventListeners() {
+        window.addEventListener('pointerdown', this.pointerdownHandler.bind(this));
+        window.addEventListener('pointerup', this.pointerupHandler.bind(this));
+        window.addEventListener('mousemove', this.mousemoveHandler.bind(this));
+    }
+
+    pointerdownHandler(e) {
+        this.isPointerDown = true;
+        this.mousemoveHandler(e);
+
+        this.pointerStartPosition = {
+            x: e.clientX,
+            y: e.clientY,
+        };
+
+        this.raycast();
+    }
+
+    pointerupHandler(e) {
+        this.isPointerDown = false;
+    }
+
+    mousemoveHandler(e) {
+        this.cursor.x = (e.clientX / this.renderSize.width) * 2 - 1;
+        this.cursor.y = -(e.clientY / this.renderSize.height) * 2 + 1;
     }
 
     /**

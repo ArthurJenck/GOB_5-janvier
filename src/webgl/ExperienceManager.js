@@ -7,6 +7,7 @@ export default class ExperienceManager {
         this.scene = options.scene;
         this.debugger = options.debugger;
         this.renderSize = options.renderSize;
+        this.camera = options.camera;
 
         this.ellapsed = 0;
 
@@ -22,7 +23,11 @@ export default class ExperienceManager {
 
     tick() {
         this.ellapsed++;
-        this.offersManager.decideIfSpawnOffer();
+        this.offersManager.tick(this.ellapsed);
+    }
+
+    resize() {
+        this.offersManager.resize();
     }
 
     createBackgroundManager() {
@@ -41,6 +46,7 @@ export default class ExperienceManager {
             scene: this.scene,
             debugger: this.debugger,
             renderSize: this.renderSize,
+            camera: this.camera,
         });
 
         return offersManager;
