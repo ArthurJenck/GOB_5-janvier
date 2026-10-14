@@ -8,7 +8,6 @@ export default class CameraManager {
 
         this.camera = this.createCamera();
         this.controls = this.createControls();
-        this.controls.enabled = false;
 
         this.setupEventListeners();
 
@@ -39,6 +38,8 @@ export default class CameraManager {
         if (savedTarget) controls.target.set(savedTarget.x, savedTarget.y, savedTarget.z);
 
         controls.update();
+
+        // controls.enabled = false;
 
         return controls;
     }

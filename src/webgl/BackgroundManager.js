@@ -4,7 +4,7 @@ const params = {
     color: '#fff',
 };
 
-export default class Background {
+export default class BackgroundManager {
     constructor(options = {}) {
         this.scene = options.scene;
         this.debugger = options.debugger;

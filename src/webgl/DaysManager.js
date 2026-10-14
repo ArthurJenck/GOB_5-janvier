@@ -1,11 +1,17 @@
-const REMAINING_DAYS = 81;
+const params = {
+    startAt: 81,
+};
 
 export default class DaysManager {
     constructor(options = {}) {
         this.ended = false;
 
+        this.debugger = options.debugger;
+
+        this.debugFolder = this.createDebugFolder();
+
         this.element = this.findHTMLElement();
-        this.remaining = this.writeRemaining(REMAINING_DAYS);
+        this.remaining = this.writeRemaining(params.startAt);
     }
 
     findHTMLElement() {
@@ -18,14 +24,20 @@ export default class DaysManager {
         return remaining;
     }
 
-    startInterval() {
-        return setInterval(() => {
+    start() {
+        this.decrease();
+        this.interval = setInterval(() => {
             this.decrease();
         }, 1000);
     }
 
-    stopInterval() {
+    stop() {
         return clearInterval(this.interval);
+    }
+
+    reset() {
+        this.stop();
+        this.remaining = this.writeRemaining(params.startAt);
     }
 
     decrease() {
@@ -33,5 +45,28 @@ export default class DaysManager {
 
         this.remaining -= 1;
         this.writeRemaining(this.remaining);
+    }
+
+    /**
+     * Debug
+     */
+    createDebugFolder() {
+        if (!this.debugger) return;
+
+        const daysFolder = this.debugger.addFolder({ title: 'Days' });
+        daysFolder.addButton({ title: 'Start' }).on('click', () => {
+            this.start();
+        });
+        daysFolder.addButton({ title: 'Stop' }).on('click', () => {
+            this.stop();
+        });
+        daysFolder.addButton({ title: 'Reset' }).on('click', () => {
+            this.reset();
+        });
+        daysFolder.addBinding(params, 'startAt').on('change', () => {
+            this.reset();
+        });
+
+        return daysFolder;
     }
 }

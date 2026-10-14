@@ -1,15 +1,20 @@
 import { WebGLRenderer } from 'three';
 import { Pane } from 'tweakpane';
 import GlobalScene from './GlobalScene';
+import ExperienceManager from './ExperienceManager';
 
 export default class WebGLApplication {
     constructor() {
         this.renderWidth = window.innerWidth;
         this.renderHeight = window.innerHeight;
+        this.experienceStarted = false;
 
         this.renderer = this.createRenderer();
         this.debugger = this.createDebugger();
         this.scene = this.createScene();
+
+        this.experienceManager = this.createExperienceManager();
+        this.startExperience();
 
         this.camera = this.scene.camera;
 
@@ -39,13 +44,30 @@ export default class WebGLApplication {
         return scene;
     }
 
+    createExperienceManager() {
+        const experienceManager = new ExperienceManager({
+            scene: this.scene,
+            debugger: this.debugger,
+            renderSize: { width: this.renderWidth, height: this.renderWidth },
+        });
+
+        return experienceManager;
+    }
+
+    startExperience() {
+        this.experienceStarted = true;
+        this.experienceManager.startExperience();
+    }
+
     resize() {
         this.renderer.setSize(this.renderWidth, this.renderHeight);
 
         this.scene.resize(this.renderWidth, this.renderHeight);
     }
 
-    update() {}
+    update() {
+        if (this.experienceStarted) this.experienceManager.tick();
+    }
 
     render() {
         this.renderer.render(this.scene, this.camera);
