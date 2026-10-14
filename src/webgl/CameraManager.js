@@ -8,6 +8,7 @@ export default class CameraManager {
 
         this.camera = this.createCamera();
         this.controls = this.createControls();
+        this.controls.enabled = false;
 
         this.setupEventListeners();
 

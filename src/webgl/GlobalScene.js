@@ -1,6 +1,7 @@
 import CameraManager from './CameraManager';
 import { BoxGeometry, Mesh, MeshBasicMaterial, Scene } from 'three';
 import LightsManager from './LightsManager';
+import Background from './Background';
 
 export default class GlobalScene extends Scene {
     constructor(options = {}) {
@@ -9,11 +10,11 @@ export default class GlobalScene extends Scene {
         this.renderer = options.renderer;
         this.debugger = options.debugger;
 
-        this.debugFolder = this.createDebugFolder();
-
         this.cameraManager = this.createCameraManager();
         this.lightsManager = this.createLightsManager();
         this.box = this.createBox();
+
+        this.backgroundManager = this.createBackground();
     }
 
     get camera() {
@@ -31,7 +32,7 @@ export default class GlobalScene extends Scene {
     createCameraManager() {
         const cameraManager = new CameraManager({
             renderer: this.renderer,
-            debugger: this.debugFolder,
+            debugger: this.debugger,
         });
 
         return cameraManager;
@@ -41,11 +42,15 @@ export default class GlobalScene extends Scene {
         const lightsManager = new LightsManager({
             scene: this,
             renderer: this.renderer,
-            debugger: this.debugFolder,
+            debugger: this.debugger,
             cameraManager: this.cameraManager,
         });
 
         return lightsManager;
+    }
+
+    createBackground() {
+        return new Background({ scene: this, debugger: this.debugger });
     }
 
     resize(width, height) {
@@ -60,8 +65,6 @@ export default class GlobalScene extends Scene {
      */
     createDebugFolder() {
         if (!this.debugger) return;
-
-        const sceneFolder = this.debugger.addFolder({ title: 'Scene', expanded: false });
 
         return sceneFolder;
     }

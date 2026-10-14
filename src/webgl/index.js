@@ -18,13 +18,6 @@ export default class WebGLApplication {
         this.setupEventListeners();
     }
 
-    /**
-     * Public
-     */
-
-    /**
-     * Private
-     */
     createRenderer() {
         const canvas = document.querySelector('canvas');
         const renderer = new WebGLRenderer({
@@ -54,9 +47,9 @@ export default class WebGLApplication {
 
     update() {}
 
-    render = () => {
+    render() {
         this.renderer.render(this.scene, this.camera);
-    };
+    }
 
     /**
      * Events
@@ -84,7 +77,7 @@ export default class WebGLApplication {
      * Debug
      */
     createDebugger() {
-        const gui = new Pane({ title: 'Debug' });
+        const gui = new Pane({ title: 'Debug', expanded: false });
 
         return gui;
     }
