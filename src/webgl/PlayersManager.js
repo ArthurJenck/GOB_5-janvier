@@ -1,5 +1,73 @@
+import { Sprite, SpriteMaterial, TextureLoader } from 'three';
+import Player from './Player';
+
+const params = {
+    playersCount: 10,
+    playerRange: 2,
+};
+
 export default class PlayersManager {
     constructor(options = {}) {
-        // const players
+        this.scene = options.scene;
+        this.debugger = options.debugger;
+        this.offersManager = options.offersManager;
+        this.players = [];
+
+        this.defaultMap = this.loadDefaultMap();
+        this.pointerMap = this.loadPointerMap();
+        this.defaultMaterial = this.createMaterial(this.defaultMap);
+        this.pointerMaterial = this.createMaterial(this.pointerMap);
+    }
+
+    tick() {
+        this.players.forEach((player) => {
+            const offers = this.offersManager.offers;
+            const { nearestOffer, nearestDistance } = player.findNearestOffer(offers);
+
+            if (!nearestOffer || nearestDistance > params.playerRange) return player.setMaterial(this.defaultMaterial);
+
+            player.moveToOffer(nearestOffer);
+
+            const intersectingOffer = player.findIntersectingOffer(offers);
+            if (intersectingOffer) {
+                player.setMaterial(this.pointerMaterial);
+                player.apply(this.offersManager, intersectingOffer);
+            } else {
+                player.setMaterial(this.defaultMaterial);
+            }
+        });
+    }
+
+    loadDefaultMap() {
+        const map = new TextureLoader().load('cursor.png');
+        map.generateMipmaps = false;
+
+        return map;
+    }
+
+    loadPointerMap() {
+        const map = new TextureLoader().load('pointer.webp');
+        map.generateMipmaps = false;
+
+        return map;
+    }
+
+    createMaterial(map) {
+        this.material = new SpriteMaterial({ map });
+        this.material.depthWrite = false;
+        this.material.depthTest = false;
+
+        return this.material;
+    }
+
+    async spawnPlayers() {
+        for (let i = 0; i < params.playersCount; i++) {
+            const player = new Player({ material: this.defaultMaterial });
+
+            this.scene.add(player.mesh);
+            player.mesh.position.x = (Math.random() * 2 - 1) * 2;
+            player.mesh.position.y = (Math.random() * 2 - 1) * 2;
+            this.players.push(player);
+        }
     }
 }

@@ -39,7 +39,7 @@ export default class CameraManager {
 
         controls.update();
 
-        // controls.enabled = false;
+        controls.enabled = false;
 
         return controls;
     }

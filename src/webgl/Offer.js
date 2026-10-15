@@ -4,9 +4,10 @@ import { BoxGeometry, Mesh, MeshBasicMaterial } from 'three';
 export default class Offer {
     constructor(options = {}) {
         this.position = options.position;
-        this.normalizedPosition = options.normalizedPosition;
         this.spawnedAt = options.spawnedAt;
         this.ttl = options.ttl;
+
+        this.isAppliedTo = false;
 
         this.geometry = this.createGeometry();
         this.material = this.createMaterial();
@@ -31,18 +32,12 @@ export default class Offer {
         return mesh;
     }
 
-    apply(scene) {
-        gsap.to(this.mesh.rotation, { y: Math.PI, duration: 0.2 }).then(() => this.destroy(scene));
+    apply() {
+        return gsap.to(this.mesh.rotation, { y: Math.PI, duration: 0.2 });
     }
 
     positionMesh(mesh) {
         mesh.position.x = this.position.x;
         mesh.position.y = this.position.y;
-    }
-
-    destroy(scene) {
-        scene.remove(this.mesh);
-        this.geometry.dispose();
-        this.material.dispose();
     }
 }

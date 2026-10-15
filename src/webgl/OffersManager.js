@@ -1,5 +1,6 @@
 import { Raycaster, Vector2 } from 'three';
 import Offer from './Offer';
+import gsap from 'gsap';
 
 const params = {
     // spawnCooldown: 60,
@@ -18,6 +19,7 @@ export default class OffersManager {
 
         this.offers = [];
         this.lastSpawnedAt = 0;
+        this.intersects = [];
 
         this.debugFolder = this.createDebugFolder();
 
@@ -31,7 +33,7 @@ export default class OffersManager {
         this.decideIfSpawnOffer(ellapsed);
 
         this.offers.forEach((offer) => {
-            if (ellapsed - offer.spawnedAt >= offer.ttl) offer.destroy(this.scene);
+            if (ellapsed - offer.spawnedAt >= offer.ttl) this.removeOffer(offer);
         });
     }
 
@@ -82,15 +84,18 @@ export default class OffersManager {
 
     raycast() {
         this.raycaster.setFromCamera(this.cursor, this.camera);
-        const intersects = this.raycaster.intersectObjects(
+        this.intersects = this.raycaster.intersectObjects(
             this.offers.map((offer) => offer.mesh),
             false,
         );
-        if (intersects.length === 0) return;
+    }
 
-        const firstTarget = intersects[0].object;
-        const offer = this.offers.find((offer) => offer.mesh === firstTarget);
-        if (offer) offer.apply(this.scene);
+    applyToOffer(offer) {
+        if (offer.isAppliedTo) return;
+
+        const tl = gsap.timeline({ onComplete: () => this.removeOffer(offer) });
+        tl.add(offer.apply(this.scene));
+        offer.isAppliedTo = true;
     }
 
     removeOffer(offer) {
@@ -127,17 +132,29 @@ export default class OffersManager {
             x: e.clientX,
             y: e.clientY,
         };
-
-        this.raycast();
     }
 
     pointerupHandler(e) {
         this.isPointerDown = false;
+
+        if (this.intersects.length === 0) return;
+
+        const firstTarget = this.intersects[0].object;
+        const offer = this.offers.find((offer) => offer.mesh === firstTarget);
+        if (offer) this.applyToOffer(offer);
     }
 
     mousemoveHandler(e) {
         this.cursor.x = (e.clientX / this.renderSize.width) * 2 - 1;
         this.cursor.y = -(e.clientY / this.renderSize.height) * 2 + 1;
+
+        this.raycast();
+
+        if (this.intersects.length > 0) {
+            canvas.style.cursor = 'pointer';
+        } else {
+            canvas.style.cursor = 'default';
+        }
     }
 
     /**
