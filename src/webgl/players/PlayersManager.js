@@ -3,7 +3,7 @@ import Player from './Player';
 
 const params = {
     playersCount: 10,
-    playerRange: 2,
+    playerRange: Infinity,
 };
 
 export default class PlayersManager {
@@ -25,7 +25,9 @@ export default class PlayersManager {
         if (!this.active) return;
 
         this.players.forEach((player) => {
-            const offers = this.offersManager.offers;
+            if (player.hasWon) return this.removePlayer(player);
+
+            const offers = this.offersManager.offers.filter((offer) => !offer.isAppliedTo);
             const { nearestOffer, nearestDistance } = player.findNearestOffer(offers);
 
             if (!nearestOffer || nearestDistance > params.playerRange) return player.setMaterial(this.defaultMaterial);
@@ -80,10 +82,15 @@ export default class PlayersManager {
         }
     }
 
+    removePlayer(player) {
+        this.scene.remove(player.mesh);
+        const index = this.players.indexOf(player);
+        if (index !== -1) this.players.splice(index, 1);
+    }
+
     removeAllPlayers() {
         [...this.players].forEach((player) => {
-            this.scene.remove(player.mesh);
-            player.material.dispose();
+            this.removePlayer(player);
         });
 
         this.players = [];

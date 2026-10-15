@@ -1,10 +1,10 @@
 import { Raycaster, Vector2 } from 'three';
 import Offer from './Offer';
-import gsap from 'gsap';
 
 const params = {
+    startOffersCount: 50,
     // spawnCooldown: 60,
-    spawnCooldown: 30,
+    spawnCooldown: 10,
     // spawnRandomThreshold: 0.005,
     spawnRandomThreshold: 0.8,
     offerTtl: 200,
@@ -42,6 +42,10 @@ export default class OffersManager {
 
     start() {
         this.active = true;
+
+        for (let i = 0; i < params.startOffersCount; i++) {
+            this.spawnOffer();
+        }
     }
 
     decideIfSpawnOffer(elasped) {
@@ -50,7 +54,7 @@ export default class OffersManager {
         }
     }
 
-    spawnOffer(spawnedAt) {
+    spawnOffer(spawnedAt = 0) {
         const normalizedPosition = {
             x: Math.random() * 2 - 1,
             y: Math.random() * 2 - 1,
@@ -61,6 +65,8 @@ export default class OffersManager {
             normalizedPosition,
             ttl: params.offerTtl,
             spawnedAt: spawnedAt,
+            scene: this.scene,
+            onComplete: () => this.removeOffer(offer),
         });
 
         this.offers.push(offer);
@@ -92,7 +98,7 @@ export default class OffersManager {
     raycast() {
         this.raycaster.setFromCamera(this.cursor, this.camera);
         this.intersects = this.raycaster.intersectObjects(
-            this.offers.map((offer) => offer.mesh),
+            this.offers.filter((offer) => !offer.isAppliedTo).map((offer) => offer.mesh),
             false,
         );
     }
@@ -100,16 +106,13 @@ export default class OffersManager {
     applyToOffer(offer, from = 'user') {
         if (offer.isAppliedTo) return;
 
-        const tl = gsap.timeline({ onComplete: () => this.removeOffer(offer) });
-        tl.add(offer.apply(from));
         offer.isAppliedTo = true;
+        return offer.apply(from);
     }
 
     removeOffer(offer) {
-        this.scene.remove(offer.mesh);
-        offer.geometry.dispose();
-        offer.material.map.dispose();
-        offer.material.dispose();
+        if (offer.disposed) return;
+        offer.dispose();
 
         const index = this.offers.indexOf(offer);
         if (index !== -1) this.offers.splice(index, 1);

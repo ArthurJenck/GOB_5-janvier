@@ -3,21 +3,31 @@ import { Sprite } from 'three';
 
 const params = {
     randomMovingThreshold: 0.5,
-    baseSpeed: 0.2,
-    randomSpeedFactor: 0.5,
+    baseSpeed: 0.001,
+    baseReactionTime: 0.01,
+    randomSpeedFactor: 1,
 };
 
 export default class Player {
     constructor(options = {}) {
         this.material = options.material;
 
+        this.hasWon;
+
         this.speed = this.getSpeed();
         this.mesh = this.createSprite();
+        this.reactionTime = this.getReactionTime();
     }
 
     getSpeed() {
         const speed = params.baseSpeed + Math.random() * params.randomSpeedFactor;
         return speed;
+    }
+
+    getReactionTime() {
+        // const reactionTime = params.baseReactionTime;
+        const reactionTime = 0;
+        return reactionTime;
     }
 
     createSprite() {
@@ -58,6 +68,7 @@ export default class Player {
             x: offer.position.x,
             y: offer.position.y,
             duration: this.speed,
+            delay: this.reactionTime,
             ease: Linear.easeNone,
         });
     }
@@ -75,6 +86,7 @@ export default class Player {
     }
 
     apply(offersManager, offer) {
-        offersManager.applyToOffer(offer, 'player');
+        const status = offersManager.applyToOffer(offer, 'player');
+        this.hasWon = status === 'accepted';
     }
 }

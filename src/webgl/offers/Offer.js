@@ -1,10 +1,11 @@
 import gsap from 'gsap';
-import { BoxGeometry, CanvasTexture, Mesh, MeshBasicMaterial, NearestFilter, SRGBColorSpace, Vector2 } from 'three';
+import { BoxGeometry, CanvasTexture, Mesh, MeshBasicMaterial, NearestFilter, SRGBColorSpace } from 'three';
+import Text from './Text';
 
 const possibleStatusesThreshold = {
     denied: { userPercentage: 1, playerPercentage: 1 },
     ghosted: { userPercentage: 0.1, playerPercentage: 0 },
-    accepted: { userPercentage: 0.001, playerPercentage: 0.2 },
+    accepted: { userPercentage: 0, playerPercentage: 0.2 },
 };
 
 export default class Offer {
@@ -12,9 +13,13 @@ export default class Offer {
         this.position = options.position;
         this.spawnedAt = options.spawnedAt;
         this.ttl = options.ttl;
+        this.normalizedPosition = options.normalizedPosition;
+        this.scene = options.scene;
+        this.onComplete = options.onComplete;
+        this.fontPromise = Text.loadFont();
 
-        this.normalizedPosition = new Vector2();
         this.isAppliedTo = false;
+        this.disposed = false;
 
         this.geometry = this.createGeometry();
         this.material = this.createMaterial();
@@ -111,7 +116,6 @@ export default class Offer {
             const threshold = possibleStatusesThreshold[key];
 
             if (random < threshold.userPercentage) {
-                if (key !== 'denied') console.log(random, threshold);
                 offerStatus.userStatus = key;
             }
 
@@ -124,16 +128,52 @@ export default class Offer {
     }
 
     apply(from = 'user') {
-        console.log(from, this.status);
         const status = from === 'user' ? this.status.userStatus : this.status.playerStatus;
 
-        const tl = new gsap.timeline();
-        tl.to(this.mesh.rotation, { y: Math.PI, duration: 0.2, repeat: status === 'ghosted' && Infinity });
-        return tl;
+        this.rotationTimeline = gsap.to(this.mesh.rotation, {
+            y: Math.PI,
+            duration: 0.2,
+            repeat: status === 'ghosted' ? -1 : 0,
+            onComplete: () => this.showResult(status),
+        });
+
+        return status;
+    }
+
+    async showResult(status) {
+        const font = await this.fontPromise;
+        if (this.disposed) return;
+        if (!font) return this.onComplete();
+
+        this.scene.remove(this.mesh);
+        this.text = this.createText(font, status);
+        this.scene.add(this.text);
+        this.textTimeline = this.text.play(this.onComplete);
+    }
+
+    createText(font, type) {
+        const text = new Text({ font, type });
+        text.position.set(this.position.x, this.position.y, 0.4);
+        return text;
+    }
+
+    dispose() {
+        this.disposed = true;
+        this.rotationTimeline?.kill();
+        this.textTimeline?.kill();
+        this.scene.remove(this.mesh);
+        if (this.text) {
+            this.scene.remove(this.text);
+            this.text.dispose();
+        }
+        this.geometry.dispose();
+        this.material.map.dispose();
+        this.material.dispose();
     }
 
     positionMesh(mesh) {
         mesh.position.x = this.position.x;
         mesh.position.y = this.position.y;
+        if (this.text) this.text.position.set(this.position.x, this.position.y, 0.4);
     }
 }
