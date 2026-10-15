@@ -4,6 +4,11 @@ import PlayersManager from './players/PlayersManager';
 import BackgroundManager from './ui/BackgroundManager';
 import DaysManager from './ui/DaysManager';
 import OverlayManager from './ui/OverlayManager';
+import ScreenShakeManager from './ui/ScreenShakeManager';
+
+const params = {
+    delay: 40,
+};
 
 export default class ExperienceManager {
     constructor(options = {}) {
@@ -17,6 +22,7 @@ export default class ExperienceManager {
         this.backgroundManager = this.createBackgroundManager();
         this.daysManager = this.createDaysManager();
         this.overlayManager = this.createOverlayManager();
+        this.screenShakeManager = this.createScreenShakeManager();
         this.offersManager = this.createOffersManager();
         this.playersManager = this.createPlayersManager();
 
@@ -26,13 +32,19 @@ export default class ExperienceManager {
     }
 
     startExperience() {
-        console.log('start');
+        this.backgroundManager.start();
+        this.overlayManager.start();
+        this.screenShakeManager.start(this.daysManager.remaining);
         this.daysManager.start();
         this.playersManager.start();
         this.offersManager.start();
     }
 
     stopExperience() {
+        this.backgroundManager.stop();
+        this.overlayManager.stop();
+        this.screenShakeManager.stop();
+        this.daysManager.stop();
         this.offersManager.stop();
         this.playersManager.stop();
     }
@@ -42,11 +54,13 @@ export default class ExperienceManager {
 
         if (this.daysManager.remaining <= 0) {
             this.switchState('ending');
+            return;
         }
 
         this.offersManager.tick(frame);
         this.playersManager.tick(time, delta / 1000);
-        this.overlayManager.tick(frame);
+        this.overlayManager.tick(delta);
+        this.screenShakeManager.tick(delta);
     }
 
     resize() {
@@ -55,13 +69,22 @@ export default class ExperienceManager {
     }
 
     createBackgroundManager() {
-        const backgroundManager = new BackgroundManager({ scene: this.scene, debugger: this.debugger });
+        const backgroundManager = new BackgroundManager({
+            scene: this.scene,
+            debugger: this.debugger,
+            delay: params.delay,
+        });
         return backgroundManager;
     }
 
     createOverlayManager() {
         const overlayManager = new OverlayManager();
         return overlayManager;
+    }
+
+    createScreenShakeManager() {
+        const screenShakeManager = new ScreenShakeManager({ delay: params.delay });
+        return screenShakeManager;
     }
 
     createDaysManager() {
@@ -77,6 +100,7 @@ export default class ExperienceManager {
             debugger: this.debugger,
             renderSize: this.renderSize,
             camera: this.camera,
+            screenShakeManager: this.screenShakeManager,
         });
 
         return offersManager;
@@ -123,6 +147,8 @@ export default class ExperienceManager {
     setupEventListeners() {
         const startBtn = document.querySelector('.start-btn');
         if (startBtn) startBtn.addEventListener('click', this.startBtnClickHandler.bind(this));
+        const restartBtn = document.querySelector('.restart-btn');
+        if (restartBtn) restartBtn.addEventListener('click', this.startBtnClickHandler.bind(this));
     }
 
     startBtnClickHandler() {

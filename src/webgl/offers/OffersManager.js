@@ -16,6 +16,7 @@ export default class OffersManager {
         this.debugger = options.debugger;
         this.renderSize = options.renderSize;
         this.camera = options.camera;
+        this.screenShakeManager = options.screenShakeManager;
 
         this.offers = [];
         this.lastSpawnedAt = 0;
@@ -152,6 +153,7 @@ export default class OffersManager {
 
     pointerupHandler(e) {
         this.isPointerDown = false;
+        this.mousemoveHandler(e);
 
         if (this.intersects.length === 0) return;
 
@@ -161,8 +163,11 @@ export default class OffersManager {
     }
 
     mousemoveHandler(e) {
-        this.cursor.x = (e.clientX / this.renderSize.width) * 2 - 1;
-        this.cursor.y = -(e.clientY / this.renderSize.height) * 2 + 1;
+        const { x, y } = this.screenShakeManager;
+        const { width, height } = this.renderSize;
+
+        this.cursor.x = ((e.clientX - x) / width) * 2 - 1;
+        this.cursor.y = -((e.clientY - y) / height) * 2 + 1;
 
         this.raycast();
 

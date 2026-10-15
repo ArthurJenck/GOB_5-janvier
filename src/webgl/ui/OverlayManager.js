@@ -1,12 +1,27 @@
 export default class OverlayManager {
     constructor(options = {}) {
         this.opacity = 0;
+        this.elapsed = 0;
+        this.active = false;
         this.overlayElement = this.createOverlay();
     }
 
-    tick(elasped) {
-        const opacity = elasped / (60 * 100);
-        this.updateGradientOpacity(opacity);
+    start() {
+        this.elapsed = 0;
+        this.active = true;
+        this.updateGradientOpacity(0);
+    }
+
+    stop() {
+        this.active = false;
+        this.updateGradientOpacity(0);
+    }
+
+    tick(delta) {
+        if (!this.active) return;
+
+        this.elapsed += delta / 1000;
+        this.updateGradientOpacity(Math.min(1, this.elapsed / 100));
     }
 
     createOverlay() {
