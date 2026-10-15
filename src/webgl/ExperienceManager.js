@@ -1,3 +1,4 @@
+import { states } from './config/states';
 import OffersManager from './offers/OffersManager';
 import PlayersManager from './players/PlayersManager';
 import BackgroundManager from './ui/BackgroundManager';
@@ -11,26 +12,40 @@ export default class ExperienceManager {
         this.renderSize = options.renderSize;
         this.camera = options.camera;
 
-        this.ellapsed = 0;
+        this.experienceStarted = false;
 
+        this.state = this.setupState('intro');
         this.backgroundManager = this.createBackgroundManager();
         this.daysManager = this.createDaysManager();
         this.overlayManager = this.createOverlayManager();
         this.offersManager = this.createOffersManager();
         this.playersManager = this.createPlayersManager();
+
+        this.setupEventListeners();
     }
 
     startExperience() {
         console.log('start');
         this.daysManager.start();
-        this.playersManager.spawnPlayers();
+        this.playersManager.start();
+        this.offersManager.start();
     }
 
-    tick() {
-        this.ellapsed++;
-        this.offersManager.tick(this.ellapsed);
-        this.playersManager.tick(this.ellapsed);
-        this.overlayManager.tick(this.ellapsed);
+    stopExperience() {
+        this.offersManager.stop();
+        this.playersManager.stop();
+    }
+
+    tick(time, delta, elapsed) {
+        if (!this.experienceStarted) return;
+
+        if (this.daysManager.remaining <= 0) {
+            this.switchState('ending');
+        }
+
+        this.offersManager.tick(elapsed);
+        this.playersManager.tick(elapsed);
+        this.overlayManager.tick(elapsed);
     }
 
     resize() {
@@ -73,6 +88,41 @@ export default class ExperienceManager {
         });
 
         return playersManager;
+    }
+
+    setupState(state) {
+        this.switchState(state);
+        return state;
+    }
+
+    switchState(state) {
+        if (this.state) {
+            states[this.state].onLeave(this);
+            const previousStateElement = document.querySelector(states[this.state].domElement);
+            if (!previousStateElement) return;
+            previousStateElement.style.display = 'none';
+        }
+
+        states[state].onEnter(this);
+        const newStateElement = document.querySelector(states[state].domElement);
+        if (!newStateElement) return;
+        newStateElement.style.display = 'flex';
+
+        this.state = state;
+
+        return state;
+    }
+
+    /**
+     * Events
+     */
+    setupEventListeners() {
+        const startBtn = document.querySelector('.start-btn');
+        if (startBtn) startBtn.addEventListener('click', this.startBtnClickHandler.bind(this));
+    }
+
+    startBtnClickHandler() {
+        this.switchState('experience');
     }
 
     /**

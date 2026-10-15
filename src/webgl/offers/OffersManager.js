@@ -4,7 +4,7 @@ import gsap from 'gsap';
 
 const params = {
     // spawnCooldown: 60,
-    spawnCooldown: 60,
+    spawnCooldown: 30,
     // spawnRandomThreshold: 0.005,
     spawnRandomThreshold: 0.8,
     offerTtl: 200,
@@ -20,6 +20,7 @@ export default class OffersManager {
         this.offers = [];
         this.lastSpawnedAt = 0;
         this.intersects = [];
+        this.active = false;
 
         this.debugFolder = this.createDebugFolder();
 
@@ -29,17 +30,23 @@ export default class OffersManager {
         this.setupEventListeners();
     }
 
-    tick(ellapsed) {
-        this.decideIfSpawnOffer(ellapsed);
+    tick(elasped) {
+        if (!this.active) return;
+
+        this.decideIfSpawnOffer(elasped);
 
         this.offers.forEach((offer) => {
-            if (ellapsed - offer.spawnedAt >= offer.ttl) this.removeOffer(offer);
+            if (elasped - offer.spawnedAt >= offer.ttl) this.removeOffer(offer);
         });
     }
 
-    decideIfSpawnOffer(ellapsed) {
-        if (ellapsed - this.lastSpawnedAt > params.spawnCooldown && Math.random() < params.spawnRandomThreshold) {
-            this.spawnOffer(ellapsed);
+    start() {
+        this.active = true;
+    }
+
+    decideIfSpawnOffer(elasped) {
+        if (elasped - this.lastSpawnedAt > params.spawnCooldown && Math.random() < params.spawnRandomThreshold) {
+            this.spawnOffer(elasped);
         }
     }
 
@@ -113,6 +120,11 @@ export default class OffersManager {
         });
 
         return this.offers;
+    }
+
+    stop() {
+        this.active = false;
+        this.removeAllOffers();
     }
 
     /**

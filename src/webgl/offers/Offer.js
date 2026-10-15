@@ -33,7 +33,9 @@ export default class Offer {
     }
 
     apply() {
-        return gsap.to(this.mesh.rotation, { y: Math.PI, duration: 0.2 });
+        const tl = new gsap.timeline();
+        tl.to(this.mesh.rotation, { y: Math.PI, duration: 0.2 });
+        return tl;
     }
 
     positionMesh(mesh) {

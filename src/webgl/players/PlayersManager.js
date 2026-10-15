@@ -11,7 +11,9 @@ export default class PlayersManager {
         this.scene = options.scene;
         this.debugger = options.debugger;
         this.offersManager = options.offersManager;
+
         this.players = [];
+        this.active = false;
 
         this.defaultMap = this.loadDefaultMap();
         this.pointerMap = this.loadPointerMap();
@@ -20,6 +22,8 @@ export default class PlayersManager {
     }
 
     tick() {
+        if (!this.active) return;
+
         this.players.forEach((player) => {
             const offers = this.offersManager.offers;
             const { nearestOffer, nearestDistance } = player.findNearestOffer(offers);
@@ -60,7 +64,12 @@ export default class PlayersManager {
         return this.material;
     }
 
-    async spawnPlayers() {
+    start() {
+        this.active = true;
+        this.spawnPlayers();
+    }
+
+    spawnPlayers() {
         for (let i = 0; i < params.playersCount; i++) {
             const player = new Player({ material: this.defaultMaterial });
 
@@ -69,5 +78,21 @@ export default class PlayersManager {
             player.mesh.position.y = (Math.random() * 2 - 1) * 2;
             this.players.push(player);
         }
+    }
+
+    removeAllPlayers() {
+        [...this.players].forEach((player) => {
+            this.scene.remove(player.mesh);
+            player.material.dispose();
+        });
+
+        this.players = [];
+
+        return this.players;
+    }
+
+    stop() {
+        this.active = false;
+        this.removeAllPlayers();
     }
 }

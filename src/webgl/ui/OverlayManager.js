@@ -4,8 +4,8 @@ export default class OverlayManager {
         this.overlayElement = this.createOverlay();
     }
 
-    tick(ellapsed) {
-        const opacity = ellapsed / (60 * 100);
+    tick(elasped) {
+        const opacity = elasped / (60 * 100);
         this.updateGradientOpacity(opacity);
     }
 
@@ -14,7 +14,7 @@ export default class OverlayManager {
         overlayElement.classList.add('overlay');
 
         overlayElement.style.backgroundImage = `linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0) 100%)`;
-        document.querySelector('body').appendChild(overlayElement);
+        document.querySelector('.experience').appendChild(overlayElement);
 
         return overlayElement;
     }

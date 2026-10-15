@@ -1,3 +1,4 @@
+import { gsap } from 'gsap';
 import { WebGLRenderer } from 'three';
 import { Pane } from 'tweakpane';
 import ExperienceManager from './ExperienceManager';
@@ -8,14 +9,12 @@ export default class WebGLApplication {
         this.renderWidth = window.innerWidth;
         this.renderHeight = window.innerHeight;
         this.renderSize = { width: this.renderWidth, height: this.renderHeight };
-        this.experienceStarted = false;
 
         this.renderer = this.createRenderer();
         this.debugger = this.createDebugger();
         this.scene = this.createScene();
         this.camera = this.scene.camera;
         this.experienceManager = this.createExperienceManager();
-        this.startExperience();
 
         this.resize();
 
@@ -54,11 +53,6 @@ export default class WebGLApplication {
         return experienceManager;
     }
 
-    startExperience() {
-        this.experienceStarted = true;
-        this.experienceManager.startExperience();
-    }
-
     resize() {
         this.renderSize.width = this.renderWidth;
         this.renderSize.height = this.renderHeight;
@@ -68,8 +62,8 @@ export default class WebGLApplication {
         this.experienceManager.resize();
     }
 
-    update() {
-        if (this.experienceStarted) this.experienceManager.tick();
+    update(time, delta, elapsed) {
+        this.experienceManager.tick(time, delta, elapsed);
     }
 
     render() {
@@ -81,7 +75,7 @@ export default class WebGLApplication {
      */
     setupEventListeners() {
         window.addEventListener('resize', this.resizeHandler.bind(this));
-        this.tickHandler();
+        gsap.ticker.add(this.tickHandler.bind(this));
     }
 
     resizeHandler() {
@@ -91,10 +85,8 @@ export default class WebGLApplication {
         this.resize();
     }
 
-    tickHandler = () => {
-        window.requestAnimationFrame(this.tickHandler);
-
-        this.update();
+    tickHandler = (time, delta, elapsed) => {
+        this.update(time, delta, elapsed);
         this.render();
     };
 
