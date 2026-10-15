@@ -2,9 +2,9 @@ import { Raycaster, Vector2 } from 'three';
 import Offer from './Offer';
 
 const params = {
-    startOffersCount: 50,
+    startOffersCount: 20,
     // spawnCooldown: 60,
-    spawnCooldown: 10,
+    spawnCooldown: 20,
     // spawnRandomThreshold: 0.005,
     spawnRandomThreshold: 0.8,
     offerTtl: 200,

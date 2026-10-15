@@ -1,9 +1,11 @@
-import { Sprite, SpriteMaterial, TextureLoader } from 'three';
+import { SpriteMaterial, TextureLoader } from 'three';
 import Player from './Player';
 
 const params = {
-    playersCount: 10,
-    playerRange: Infinity,
+    playersCount: 25,
+    spawnDelayMin: 8,
+    spawnDelayMax: 14,
+    spawnMargin: 0.15,
 };
 
 export default class PlayersManager {
@@ -11,9 +13,12 @@ export default class PlayersManager {
         this.scene = options.scene;
         this.debugger = options.debugger;
         this.offersManager = options.offersManager;
+        this.camera = options.camera;
+        this.renderSize = options.renderSize;
 
         this.players = [];
         this.active = false;
+        this.nextSpawnAt = null;
 
         this.defaultMap = this.loadDefaultMap();
         this.pointerMap = this.loadPointerMap();
@@ -21,25 +26,25 @@ export default class PlayersManager {
         this.pointerMaterial = this.createMaterial(this.pointerMap);
     }
 
-    tick() {
+    tick(time, delta) {
         if (!this.active) return;
 
-        this.players.forEach((player) => {
+        this.decideIfSpawnPlayer(time);
+
+        [...this.players].forEach((player) => {
             if (player.hasWon) return this.removePlayer(player);
 
+            player.setMaterial(this.defaultMaterial);
             const offers = this.offersManager.offers.filter((offer) => !offer.isAppliedTo);
-            const { nearestOffer, nearestDistance } = player.findNearestOffer(offers);
+            const reachedOffer = player.tick(time, delta, offers);
+            if (!reachedOffer) return;
 
-            if (!nearestOffer || nearestDistance > params.playerRange) return player.setMaterial(this.defaultMaterial);
+            player.setMaterial(this.pointerMaterial);
+            player.apply(this.offersManager, reachedOffer);
 
-            player.moveToOffer(nearestOffer);
-
-            const intersectingOffer = player.findIntersectingOffer(offers);
-            if (intersectingOffer) {
-                player.setMaterial(this.pointerMaterial);
-                player.apply(this.offersManager, intersectingOffer);
-            } else {
-                player.setMaterial(this.defaultMaterial);
+            if (!player.hasWon) {
+                const remainingOffers = this.offersManager.offers.filter((offer) => !offer.isAppliedTo);
+                player.decideNextAction(time, remainingOffers);
             }
         });
     }
@@ -68,18 +73,63 @@ export default class PlayersManager {
 
     start() {
         this.active = true;
+        this.nextSpawnAt = null;
         this.spawnPlayers();
+    }
+
+    spawnPlayer() {
+        const bounds = this.getBounds();
+        const player = new Player({
+            material: this.defaultMaterial,
+            bounds,
+            position: {
+                x: bounds.minX + Math.random() * (bounds.maxX - bounds.minX),
+                y: bounds.minY + Math.random() * (bounds.maxY - bounds.minY),
+            },
+        });
+
+        this.scene.add(player.mesh);
+        this.players.push(player);
+
+        return player;
     }
 
     spawnPlayers() {
         for (let i = 0; i < params.playersCount; i++) {
-            const player = new Player({ material: this.defaultMaterial });
-
-            this.scene.add(player.mesh);
-            player.mesh.position.x = (Math.random() * 2 - 1) * 2;
-            player.mesh.position.y = (Math.random() * 2 - 1) * 2;
-            this.players.push(player);
+            this.spawnPlayer();
         }
+    }
+
+    decideIfSpawnPlayer(time) {
+        if (this.nextSpawnAt === null) this.nextSpawnAt = time + this.getSpawnDelay();
+        if (time < this.nextSpawnAt) return;
+
+        this.spawnPlayer();
+        this.nextSpawnAt = time + this.getSpawnDelay();
+    }
+
+    getSpawnDelay() {
+        return params.spawnDelayMin + Math.random() * (params.spawnDelayMax - params.spawnDelayMin);
+    }
+
+    resize() {
+        const bounds = this.getBounds();
+        this.players.forEach((player) => player.setBounds(bounds));
+    }
+
+    getBounds() {
+        const distance = Math.max(0, this.camera.position.z - 0.25);
+        const halfHeight = Math.tan((this.camera.fov * Math.PI) / 360) * distance;
+        const halfWidth = halfHeight * (this.renderSize.width / this.renderSize.height);
+        const width = Math.max(0, halfWidth - params.spawnMargin);
+        const height = Math.max(0, halfHeight - params.spawnMargin);
+
+        return {
+            minX: this.camera.position.x - width,
+            maxX: this.camera.position.x + width,
+            minY: this.camera.position.y - height,
+            maxY: this.camera.position.y + height,
+        };
     }
 
     removePlayer(player) {
@@ -100,6 +150,7 @@ export default class PlayersManager {
 
     stop() {
         this.active = false;
+        this.nextSpawnAt = null;
         this.removeAllPlayers();
     }
 }

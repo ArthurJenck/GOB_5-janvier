@@ -1,4 +1,4 @@
-import gsap from 'gsap';
+import gsap, { Linear } from 'gsap';
 import { BoxGeometry, CanvasTexture, Mesh, MeshBasicMaterial, NearestFilter, SRGBColorSpace } from 'three';
 import Text from './Text';
 
@@ -129,13 +129,17 @@ export default class Offer {
 
     apply(from = 'user') {
         const status = from === 'user' ? this.status.userStatus : this.status.playerStatus;
-
-        this.rotationTimeline = gsap.to(this.mesh.rotation, {
-            y: Math.PI,
-            duration: 0.2,
-            repeat: status === 'ghosted' ? -1 : 0,
+        const tl = gsap.timeline({
             onComplete: () => this.showResult(status),
         });
+        tl.to(this.mesh.rotation, {
+            y: Math.PI,
+            duration: 0.2,
+            ease: Linear.easeNone,
+            repeat: status === 'ghosted' ? -1 : 0,
+        });
+
+        this.rotationTimeline = tl;
 
         return status;
     }

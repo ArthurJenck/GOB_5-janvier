@@ -37,20 +37,21 @@ export default class ExperienceManager {
         this.playersManager.stop();
     }
 
-    tick(time, delta, elapsed) {
+    tick(time, delta, frame) {
         if (!this.experienceStarted) return;
 
         if (this.daysManager.remaining <= 0) {
             this.switchState('ending');
         }
 
-        this.offersManager.tick(elapsed);
-        this.playersManager.tick(elapsed);
-        this.overlayManager.tick(elapsed);
+        this.offersManager.tick(frame);
+        this.playersManager.tick(time, delta / 1000);
+        this.overlayManager.tick(frame);
     }
 
     resize() {
         this.offersManager.resize();
+        this.playersManager.resize();
     }
 
     createBackgroundManager() {
@@ -86,6 +87,8 @@ export default class ExperienceManager {
             scene: this.scene,
             debugger: this.debugger,
             offersManager: this.offersManager,
+            camera: this.camera,
+            renderSize: this.renderSize,
         });
 
         return playersManager;
