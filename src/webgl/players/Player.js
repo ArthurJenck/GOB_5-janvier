@@ -75,6 +75,6 @@ export default class Player {
     }
 
     apply(offersManager, offer) {
-        offersManager.applyToOffer(offer);
+        offersManager.applyToOffer(offer, 'player');
     }
 }

@@ -36,7 +36,7 @@ export default class OffersManager {
         this.decideIfSpawnOffer(elasped);
 
         this.offers.forEach((offer) => {
-            if (elasped - offer.spawnedAt >= offer.ttl) this.removeOffer(offer);
+            if (!offer.isAppliedTo && elasped - offer.spawnedAt >= offer.ttl) this.removeOffer(offer);
         });
     }
 
@@ -97,11 +97,11 @@ export default class OffersManager {
         );
     }
 
-    applyToOffer(offer) {
+    applyToOffer(offer, from = 'user') {
         if (offer.isAppliedTo) return;
 
         const tl = gsap.timeline({ onComplete: () => this.removeOffer(offer) });
-        tl.add(offer.apply(this.scene));
+        tl.add(offer.apply(from));
         offer.isAppliedTo = true;
     }
 

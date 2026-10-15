@@ -1,6 +1,12 @@
 import gsap from 'gsap';
 import { BoxGeometry, CanvasTexture, Mesh, MeshBasicMaterial, NearestFilter, SRGBColorSpace, Vector2 } from 'three';
 
+const possibleStatusesThreshold = {
+    denied: { userPercentage: 1, playerPercentage: 1 },
+    ghosted: { userPercentage: 0.1, playerPercentage: 0 },
+    accepted: { userPercentage: 0.001, playerPercentage: 0.2 },
+};
+
 export default class Offer {
     constructor(options = {}) {
         this.position = options.position;
@@ -13,6 +19,7 @@ export default class Offer {
         this.geometry = this.createGeometry();
         this.material = this.createMaterial();
         this.mesh = this.createMesh();
+        this.status = this.chooseStatus();
     }
 
     createGeometry() {
@@ -94,9 +101,34 @@ export default class Offer {
         return mesh;
     }
 
-    apply() {
+    chooseStatus() {
+        const random = Math.random();
+        const offerStatus = { userStatus: 'denied', playerStatus: 'denied' };
+
+        for (const key in possibleStatusesThreshold) {
+            if (!Object.hasOwn(possibleStatusesThreshold, key)) continue;
+
+            const threshold = possibleStatusesThreshold[key];
+
+            if (random < threshold.userPercentage) {
+                if (key !== 'denied') console.log(random, threshold);
+                offerStatus.userStatus = key;
+            }
+
+            if (random < threshold.playerPercentage) {
+                offerStatus.playerStatus = key;
+            }
+        }
+
+        return offerStatus;
+    }
+
+    apply(from = 'user') {
+        console.log(from, this.status);
+        const status = from === 'user' ? this.status.userStatus : this.status.playerStatus;
+
         const tl = new gsap.timeline();
-        tl.to(this.mesh.rotation, { y: Math.PI, duration: 0.2 });
+        tl.to(this.mesh.rotation, { y: Math.PI, duration: 0.2, repeat: status === 'ghosted' && Infinity });
         return tl;
     }
 

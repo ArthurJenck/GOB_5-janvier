@@ -14,12 +14,13 @@ export default class ExperienceManager {
 
         this.experienceStarted = false;
 
-        this.state = this.setupState('intro');
         this.backgroundManager = this.createBackgroundManager();
         this.daysManager = this.createDaysManager();
         this.overlayManager = this.createOverlayManager();
         this.offersManager = this.createOffersManager();
         this.playersManager = this.createPlayersManager();
+
+        this.state = this.setupState('experience');
 
         this.setupEventListeners();
     }
