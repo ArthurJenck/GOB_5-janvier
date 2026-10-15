@@ -1,7 +1,8 @@
-import BackgroundManager from './BackgroundManager';
-import DaysManager from './DaysManager';
-import OffersManager from './OffersManager';
-import PlayersManager from './PlayersManager';
+import OffersManager from './offers/OffersManager';
+import PlayersManager from './players/PlayersManager';
+import BackgroundManager from './ui/BackgroundManager';
+import DaysManager from './ui/DaysManager';
+import OverlayManager from './ui/OverlayManager';
 
 export default class ExperienceManager {
     constructor(options = {}) {
@@ -14,6 +15,7 @@ export default class ExperienceManager {
 
         this.backgroundManager = this.createBackgroundManager();
         this.daysManager = this.createDaysManager();
+        this.overlayManager = this.createOverlayManager();
         this.offersManager = this.createOffersManager();
         this.playersManager = this.createPlayersManager();
     }
@@ -28,6 +30,7 @@ export default class ExperienceManager {
         this.ellapsed++;
         this.offersManager.tick(this.ellapsed);
         this.playersManager.tick(this.ellapsed);
+        this.overlayManager.tick(this.ellapsed);
     }
 
     resize() {
@@ -35,7 +38,13 @@ export default class ExperienceManager {
     }
 
     createBackgroundManager() {
-        return new BackgroundManager({ scene: this.scene, debugger: this.debugger });
+        const backgroundManager = new BackgroundManager({ scene: this.scene, debugger: this.debugger });
+        return backgroundManager;
+    }
+
+    createOverlayManager() {
+        const overlayManager = new OverlayManager();
+        return overlayManager;
     }
 
     createDaysManager() {

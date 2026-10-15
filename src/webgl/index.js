@@ -1,7 +1,7 @@
 import { WebGLRenderer } from 'three';
 import { Pane } from 'tweakpane';
-import GlobalScene from './GlobalScene';
 import ExperienceManager from './ExperienceManager';
+import GlobalScene from './scene/GlobalScene';
 
 export default class WebGLApplication {
     constructor() {

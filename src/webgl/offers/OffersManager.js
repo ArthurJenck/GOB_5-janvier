@@ -150,10 +150,11 @@ export default class OffersManager {
 
         this.raycast();
 
+        const domElement = document.querySelector('body');
         if (this.intersects.length > 0) {
-            canvas.style.cursor = 'pointer';
+            domElement.style.cursor = 'pointer';
         } else {
-            canvas.style.cursor = 'default';
+            domElement.style.cursor = 'default';
         }
     }
 
