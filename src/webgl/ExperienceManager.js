@@ -20,7 +20,7 @@ export default class ExperienceManager {
         this.offersManager = this.createOffersManager();
         this.playersManager = this.createPlayersManager();
 
-        this.state = this.setupState('experience');
+        this.state = this.setupState('intro');
 
         this.setupEventListeners();
     }

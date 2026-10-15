@@ -31,7 +31,7 @@ export default class Text extends Mesh {
 
     static loadFont() {
         if (!fontPromise) {
-            fontPromise = new FontLoader().loadAsync('/fonts/pixelify.json').catch((error) => {
+            fontPromise = new FontLoader().loadAsync('/fonts/tiny5.json').catch((error) => {
                 console.error('Unable to load the text font', error);
                 return null;
             });

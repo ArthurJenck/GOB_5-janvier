@@ -43,29 +43,29 @@ export default class Offer {
             rectangles.forEach(([x, y, width, height]) => ctx.fillRect(x, y, width, height));
         };
 
-        draw('#4b2d00', [[0, 0, 32, 32]]);
-        draw('#704500', [
+        draw('#004B00', [[0, 0, 32, 32]]);
+        draw('#007000', [
             [2, 1, 28, 30],
             [1, 3, 30, 26],
         ]);
-        draw('#956507', [
+        draw('#079507', [
             [4, 3, 24, 26],
             [3, 5, 26, 22],
         ]);
-        draw('#c39a1d', [
+        draw('#1DC31D', [
             [6, 5, 20, 22],
             [5, 7, 22, 18],
         ]);
-        draw('#d9af30', [
+        draw('#33D930', [
             [7, 6, 18, 2],
             [6, 8, 2, 16],
             [8, 26, 17, 1],
         ]);
-        draw('#f0c94a', [
+        draw('#4AF04A', [
             [8, 6, 15, 1],
             [6, 9, 1, 12],
         ]);
-        draw('#805400', [
+        draw('#008000', [
             [25, 8, 2, 17],
             [8, 27, 18, 2],
         ]);
@@ -80,10 +80,10 @@ export default class Offer {
         ];
 
         draw(
-            '#6b4000',
+            '#006B00',
             questionMark.map(([x, y, width, height]) => [x + 2, y + 1, width, height]),
         );
-        draw('#fff8df', questionMark);
+        draw('#DFFFE0', questionMark);
         draw('#ffffff', [
             [11, 11, 2, 4],
             [15, 25, 3, 3],

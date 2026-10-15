@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Tiny5&display=swap');
+
 html,
 body {
     margin: 0;
@@ -5,6 +7,8 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
+
+    font-family: 'Tiny5', sans-serif;
 }
 
 * {
@@ -13,6 +17,7 @@ body {
 }
 
 .intro-ui {
+    position: fixed;
     width: 100%;
     height: 100%;
     display: flex;
@@ -22,6 +27,71 @@ body {
     display: none;
     gap: 1rem;
     text-align: center;
+
+    h1 {
+        font-size: 4rem;
+    }
+
+    .description {
+        padding-inline: 4rem;
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+
+        em {
+            font-style: normal;
+            color: #008937;
+        }
+    }
+
+    .start-btn {
+        border: none;
+        background-color: transparent;
+        font-family: 'Tiny5', sans-serif;
+        border: 3px solid transparent;
+        border-bottom-color: black;
+        cursor: pointer;
+        font-size: 1.5rem;
+        animation: shake 0.1s ease-in infinite alternate;
+        transition: padding 0.3s ease-in-out;
+
+        &:hover {
+            scale: 1.1;
+            border-color: black;
+            padding: 1rem;
+        }
+    }
+
+    .links {
+        position: absolute;
+        width: 100%;
+        left: 0;
+        bottom: 1rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+
+        a {
+            text-decoration: none;
+            color: black;
+            border-bottom: 2px solid black;
+            transition: scale 0.3s ease-in-out;
+
+            &:hover {
+                scale: 1.1;
+            }
+        }
+    }
+}
+
+@keyframes shake {
+    from {
+        transform: rotate(1.5deg);
+    }
+
+    to {
+        transform: rotate(-1.5deg);
+    }
 }
 
 .experience {
@@ -29,6 +99,7 @@ body {
 }
 
 .tp-dfwv {
+    display: none;
     z-index: 99;
 }
 
