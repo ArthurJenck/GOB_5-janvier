@@ -3,8 +3,8 @@ import { Color } from 'three';
 
 const params = {
     color: '#fff',
-    duration: 40,
-    delay: 20,
+    duration: 30,
+    delay: 40,
 };
 
 export default class BackgroundManager {

@@ -108,6 +108,7 @@ export default class OffersManager {
     removeOffer(offer) {
         this.scene.remove(offer.mesh);
         offer.geometry.dispose();
+        offer.material.map.dispose();
         offer.material.dispose();
 
         const index = this.offers.indexOf(offer);
