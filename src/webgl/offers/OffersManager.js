@@ -17,6 +17,7 @@ export default class OffersManager {
         this.renderSize = options.renderSize;
         this.camera = options.camera;
         this.screenShakeManager = options.screenShakeManager;
+        this.audioManager = options.audioManager;
 
         this.offers = [];
         this.lastSpawnedAt = 0;
@@ -68,6 +69,7 @@ export default class OffersManager {
             spawnedAt: spawnedAt,
             scene: this.scene,
             onComplete: () => this.removeOffer(offer),
+            audioManager: this.audioManager,
         });
 
         this.offers.push(offer);

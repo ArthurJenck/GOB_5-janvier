@@ -94,6 +94,7 @@ export default class WebGLApplication {
      * Debug
      */
     createDebugger() {
+        if (import.meta.env.PROD) return;
         const gui = new Pane({ title: 'Debug', expanded: false });
 
         return gui;

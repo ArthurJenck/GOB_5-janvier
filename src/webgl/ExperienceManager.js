@@ -1,4 +1,5 @@
 import { states } from './config/states';
+import AudioManager from './audio/AudioManager';
 import OffersManager from './offers/OffersManager';
 import PlayersManager from './players/PlayersManager';
 import BackgroundManager from './ui/BackgroundManager';
@@ -7,6 +8,7 @@ import OverlayManager from './ui/OverlayManager';
 import ScreenShakeManager from './ui/ScreenShakeManager';
 
 const params = {
+    kettleSoundDelay: 61,
     delay: 40,
 };
 
@@ -19,6 +21,7 @@ export default class ExperienceManager {
 
         this.experienceStarted = false;
 
+        this.audioManager = this.createAudioManager();
         this.backgroundManager = this.createBackgroundManager();
         this.daysManager = this.createDaysManager();
         this.overlayManager = this.createOverlayManager();
@@ -32,6 +35,7 @@ export default class ExperienceManager {
     }
 
     startExperience() {
+        this.audioManager.startExperience();
         this.backgroundManager.start();
         this.overlayManager.start();
         this.screenShakeManager.start(this.daysManager.remaining);
@@ -57,15 +61,22 @@ export default class ExperienceManager {
             return;
         }
 
+        this.screenShakeManager.tick(delta);
         this.offersManager.tick(frame);
         this.playersManager.tick(time, delta / 1000);
         this.overlayManager.tick(delta);
-        this.screenShakeManager.tick(delta);
     }
 
     resize() {
         this.offersManager.resize();
         this.playersManager.resize();
+    }
+
+    createAudioManager() {
+        const audioManager = new AudioManager({
+            kettleDelay: params.kettleSoundDelay,
+        });
+        return audioManager;
     }
 
     createBackgroundManager() {
@@ -101,6 +112,7 @@ export default class ExperienceManager {
             renderSize: this.renderSize,
             camera: this.camera,
             screenShakeManager: this.screenShakeManager,
+            audioManager: this.audioManager,
         });
 
         return offersManager;
@@ -147,11 +159,12 @@ export default class ExperienceManager {
     setupEventListeners() {
         const startBtn = document.querySelector('.start-btn');
         if (startBtn) startBtn.addEventListener('click', this.startBtnClickHandler.bind(this));
-        const restartBtn = document.querySelector('.restart-btn');
+        const restartBtn = document.querySelector('.restart-btn', this.startBtnClickHandler.bind(this));
         if (restartBtn) restartBtn.addEventListener('click', this.startBtnClickHandler.bind(this));
     }
 
     startBtnClickHandler() {
+        this.audioManager.resume();
         this.switchState('experience');
     }
 

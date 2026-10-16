@@ -25,6 +25,7 @@ export default class DaysManager {
     }
 
     start() {
+        this.remaining = this.writeRemaining(params.startAt);
         this.decrease();
         this.interval = setInterval(() => {
             this.decrease();

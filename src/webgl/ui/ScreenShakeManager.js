@@ -9,6 +9,7 @@ const params = {
 export default class ScreenShakeManager {
     constructor(options = {}) {
         this.delay = options.delay;
+
         this.noise = new ImprovedNoise();
         this.active = false;
         this.elapsed = 0;

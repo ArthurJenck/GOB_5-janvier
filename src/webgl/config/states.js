@@ -17,13 +17,20 @@ export const states = {
             const guiElement = document.querySelector('.tp-dfwv');
             if (guiElement) guiElement.style.display = 'hidden';
 
+            app.audioManager.stopSfx('music');
+            app.audioManager.stopSfx('kettle');
+
             app.experienceStarted = false;
             app.stopExperience();
         },
     },
     ending: {
         domElement: '.ending',
-        onEnter: () => {},
-        onLeave: () => {},
+        onEnter: async (app) => {
+            app.audioManager.playSfx('ding');
+        },
+        onLeave: (app) => {
+            app.startExperience();
+        },
     },
 };

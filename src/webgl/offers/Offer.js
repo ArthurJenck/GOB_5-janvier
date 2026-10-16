@@ -16,11 +16,12 @@ export default class Offer {
         this.normalizedPosition = options.normalizedPosition;
         this.scene = options.scene;
         this.onComplete = options.onComplete;
-        this.fontPromise = Text.loadFont();
+        this.audioManager = options.audioManager;
 
         this.isAppliedTo = false;
         this.disposed = false;
 
+        this.fontPromise = Text.loadFont();
         this.geometry = this.createGeometry();
         this.material = this.createMaterial();
         this.mesh = this.createMesh();
@@ -145,6 +146,10 @@ export default class Offer {
     }
 
     async showResult(status) {
+        if (status === 'accepted') {
+            this.audioManager.playSfx('youWin', 0.1);
+        }
+
         const font = await this.fontPromise;
         if (this.disposed) return;
         if (!font) return this.onComplete();
