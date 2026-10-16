@@ -4,8 +4,11 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
 const params = {
-    accepted: { words: ['Gagné', 'Accepté', 'Bravo', 'Jackpot'], color: 0x35c759 },
-    denied: { words: ['Perdu', 'Refusé', 'Non', 'Pas cette fois', 'Désolé', 'Navré', ':/'], color: 0xe83f4b },
+    accepted: { words: ['Gagné', 'Accepté', 'Bravo', 'Jackpot', 'Trouvé'], color: 0x35c759 },
+    denied: {
+        words: ['Perdu', 'Refusé', 'Non', 'Pas cette fois', 'Désolé', 'Navré', ':/', 'Raté', 'Nullos', 'Dégage'],
+        color: 0xe83f4b,
+    },
     size: 0.06,
     depth: 0.02,
 };
