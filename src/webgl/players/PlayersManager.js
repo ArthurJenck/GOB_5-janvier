@@ -2,7 +2,7 @@ import { SpriteMaterial, TextureLoader } from 'three';
 import Player from './Player';
 
 const params = {
-    playersCount: 25,
+    playersCount: 0,
     spawnDelayMin: 8,
     spawnDelayMax: 14,
     spawnMargin: 0.15,

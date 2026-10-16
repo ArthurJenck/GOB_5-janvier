@@ -1,4 +1,4 @@
-import { Raycaster, Vector2 } from 'three';
+import { Raycaster } from 'three';
 import Offer from './Offer';
 
 const params = {
@@ -14,10 +14,10 @@ export default class OffersManager {
     constructor(options = {}) {
         this.scene = options.scene;
         this.debugger = options.debugger;
-        this.renderSize = options.renderSize;
         this.camera = options.camera;
-        this.screenShakeManager = options.screenShakeManager;
         this.audioManager = options.audioManager;
+        this.mousemoveHandler = options.mousemoveHandler;
+        this.cursor = options.cursor;
 
         this.offers = [];
         this.lastSpawnedAt = 0;
@@ -27,7 +27,6 @@ export default class OffersManager {
         this.debugFolder = this.createDebugFolder();
 
         this.raycaster = new Raycaster();
-        this.cursor = new Vector2();
 
         this.setupEventListeners();
     }
@@ -104,6 +103,7 @@ export default class OffersManager {
             this.offers.filter((offer) => !offer.isAppliedTo).map((offer) => offer.mesh),
             false,
         );
+        return this.intersects;
     }
 
     applyToOffer(offer, from = 'user') {
@@ -140,45 +140,20 @@ export default class OffersManager {
     setupEventListeners() {
         window.addEventListener('pointerdown', this.pointerdownHandler.bind(this));
         window.addEventListener('pointerup', this.pointerupHandler.bind(this));
-        window.addEventListener('mousemove', this.mousemoveHandler.bind(this));
     }
 
     pointerdownHandler(e) {
         this.isPointerDown = true;
-        this.mousemoveHandler(e);
-
-        this.pointerStartPosition = {
-            x: e.clientX,
-            y: e.clientY,
-        };
     }
 
     pointerupHandler(e) {
         this.isPointerDown = false;
-        this.mousemoveHandler(e);
 
         if (this.intersects.length === 0) return;
 
         const firstTarget = this.intersects[0].object;
         const offer = this.offers.find((offer) => offer.mesh === firstTarget);
         if (offer) this.applyToOffer(offer);
-    }
-
-    mousemoveHandler(e) {
-        const { x, y } = this.screenShakeManager;
-        const { width, height } = this.renderSize;
-
-        this.cursor.x = ((e.clientX - x) / width) * 2 - 1;
-        this.cursor.y = -((e.clientY - y) / height) * 2 + 1;
-
-        this.raycast();
-
-        const domElement = document.querySelector('body');
-        if (this.intersects.length > 0) {
-            domElement.style.cursor = 'pointer';
-        } else {
-            domElement.style.cursor = 'default';
-        }
     }
 
     /**

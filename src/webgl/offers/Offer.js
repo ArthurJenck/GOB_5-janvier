@@ -5,7 +5,7 @@ import Text from './Text';
 const possibleStatusesThreshold = {
     denied: { userPercentage: 1, playerPercentage: 1 },
     ghosted: { userPercentage: 0.1, playerPercentage: 0 },
-    accepted: { userPercentage: 0, playerPercentage: 0.2 },
+    accepted: { userPercentage: -1, playerPercentage: 0.2 },
 };
 
 export default class Offer {

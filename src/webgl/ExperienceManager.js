@@ -6,6 +6,7 @@ import BackgroundManager from './ui/BackgroundManager';
 import DaysManager from './ui/DaysManager';
 import OverlayManager from './ui/OverlayManager';
 import ScreenShakeManager from './ui/ScreenShakeManager';
+import { Vector2 } from 'three';
 
 const params = {
     kettleSoundDelay: 61,
@@ -19,6 +20,7 @@ export default class ExperienceManager {
         this.renderSize = options.renderSize;
         this.camera = options.camera;
 
+        this.cursor = new Vector2();
         this.experienceStarted = false;
 
         this.audioManager = this.createAudioManager();
@@ -109,10 +111,10 @@ export default class ExperienceManager {
         const offersManager = new OffersManager({
             scene: this.scene,
             debugger: this.debugger,
-            renderSize: this.renderSize,
             camera: this.camera,
-            screenShakeManager: this.screenShakeManager,
             audioManager: this.audioManager,
+            mousemoveHandler: this.mousemoveHandler,
+            cursor: this.cursor,
         });
 
         return offersManager;
@@ -161,11 +163,31 @@ export default class ExperienceManager {
         if (startBtn) startBtn.addEventListener('click', this.startBtnClickHandler.bind(this));
         const restartBtn = document.querySelector('.restart-btn', this.startBtnClickHandler.bind(this));
         if (restartBtn) restartBtn.addEventListener('click', this.startBtnClickHandler.bind(this));
+
+        window.addEventListener('mousemove', this.mousemoveHandler.bind(this));
     }
 
     startBtnClickHandler() {
         this.audioManager.resume();
         this.switchState('experience');
+    }
+
+    mousemoveHandler(e) {
+        const x = this.screenShakeManager.x;
+        const y = this.screenShakeManager.y;
+        const { width, height } = this.renderSize;
+
+        this.cursor.x = ((e.clientX - x) / width) * 2 - 1;
+        this.cursor.y = -((e.clientY - y) / height) * 2 + 1;
+
+        const intersects = this.offersManager.raycast();
+
+        const domElement = document.querySelector('body');
+        if (intersects.length > 0) {
+            domElement.style.cursor = 'pointer';
+        } else {
+            domElement.style.cursor = 'default';
+        }
     }
 
     /**
